@@ -1,4 +1,6 @@
 # 9anime_dl
+- Supported Platforms: **Windows**
+- Downloads to `C:\Users\USER\Videos\Anime`
 
 Anime Downloader scraping from 9anime.
 
