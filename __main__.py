@@ -20,30 +20,24 @@ from time import sleep
 
 
 
-def clear():  #  Clears the terminal
+def clear():  #  Clears the terminal  |  For formatting purposes
     Popen("cls", shell=True).wait()
 
 
-# For formatting purposes
 clear()
+
+
+def kill(reason):
+    exit(input("\n" + reason))
 
 
 def headless(options):  #  Set Options (selenium) to headless mode
     options.add_argument("--headless")
     return options
 
+
 def driver():  #  Initiate selenium.webdriver
     return Firefox(options=headless(Options()))
-
-
-
-def check(path):  #  Checks if there is an existing directory of the requested anime
-
-    if not exists(path):
-        makedirs(path)
-
-    return path + "Episode %s.mp4"
-
 
 
 def status(content, new=False, bag=['']):  #  Print over initial print
@@ -56,8 +50,18 @@ def status(content, new=False, bag=['']):  #  Print over initial print
         bag.append(content)
         print(content + " " * len(bag[-2]), end="\r")
 
+
 def inputfmt(content):  #  Formatted for user-input
     return input("%s\n\n\t> " % content)
+
+
+
+def check(path):  #  Checks if there is an existing directory of the requested anime
+
+    if not exists(path):
+        makedirs(path)
+
+    return path + "Episode %s.mp4"
 
 
 
@@ -71,7 +75,7 @@ def getjs(driver, urls):  #  webdriver.get  -> BeautifulSoup
 
     for url in urls:
         driver.get(url)
-        sleep(1)
+        sleep(3)
         yield getsoup(driver.page_source)
 
     driver.quit()
@@ -79,29 +83,26 @@ def getjs(driver, urls):  #  webdriver.get  -> BeautifulSoup
 
 
 def userlist(titlelist):  #  Formats results [0-9] for selection
-    return (lambda MAX: "{1}\n{0}\n{1}".format(f"\n".join("%s [%s]" % (title + " " *(MAX - len(title)), str(index)) for index, title in enumerate(titlelist)), "-" * (MAX + 4))) (len(max(titlelist, key=len)) + 5)
+    return (lambda MAX: "\n{1}\n{0}\n{1}".format("\n".join("%s [%s]" % (title + " " *(MAX - len(title)), str(index)) for index, title in enumerate(titlelist)), "-" * (MAX + 4))) (len(max(titlelist, key=len)) + 5)
 
 def listsearch(soup):  # FIX LATER // ["data-jtitle"] -> Repetition
-    return (lambda DATA: {str(index):[a["data-jtitle"], a["href"]] for index, a in enumerate(DATA)}.get(inputfmt(userlist([a["data-jtitle"] for a in DATA])))) ([li.find("a", class_="name") for li in soup.find("ul", class_="anime-list").find_all("li")[:10]]) if soup.find("ul", class_="anime-list").find("li") else quit(print("Anime not found"))
-
+    return (lambda DATA: {str(index):[a["data-jtitle"], a["href"]] for index, a in enumerate(DATA)}.get(inputfmt(userlist([a["data-jtitle"] for a in DATA])))) ([li.find("a", class_="name") for li in soup.find("ul", class_="anime-list").find_all("li")[:10]]) if soup.find("ul", class_="anime-list").find("li") else kill("Anime not found")
 
 
 def sortinput(inp, EPS):  #  Selects applicable episode(s) for download
 
     try:
-
         if "-" not in inp:
             if not exists(PATH % inp):
                 return [EPS[EPS.index(inp)]]
             else:
-                quit(print("Episode already downloaded"))
+                kill("Episode already downloaded")
 
         else:
             return [ep for ep in EPS[(lambda start, end: slice(start, end + 1)) (*(EPS.index(indice) for indice in inp.split("-")))] if not exists(PATH % ep)]
 
     except IndexError:
-        quit(print("Invalid Episode"))
-
+        kill("Invalid Episode")
 
 
 def grabeps(driver):  #  Grab each episode number from each ul available
@@ -118,11 +119,9 @@ def grabdl(URL):  #  Post request in order to grab downlink link from direct hos
     return post(URL, data={"token": gethtml(URL).find("input", type="hidden")["value"]}, headers={"Content-Type": "application/x-www-form-urlencoded"}, stream=True).url
 
 
-
 def grabbing(driver, EPISODES):  #  Grabs path and direct download link for each episode
     for path, dl in zip([PATH % ep for ep in EPISODES], [grabdl(VIDSTREAM + grabkey(soup)) for soup in getjs(driver, [EP_FMT % ep for ep in EPISODES])]):
-        yield path[:-4].rsplit('\\', 1)[1], path, dl
-
+        yield path[:-4].rsplit("\\", 1)[1], path, dl
 
 
 def download(INFO):  #  Writes the content of each direct download link to the specified path.
@@ -134,7 +133,6 @@ def download(INFO):  #  Writes the content of each direct download link to the s
                 f.write(chunk)
 
             status("Downloaded: " + ep, new=True)
-
 
 
 
@@ -151,7 +149,6 @@ status("Locating")
 ANIME, HREF = listsearch(gethtml(HOST + "search?keyword=" + input(f'Download Path:  "{DOWNLOAD_PATH}"\n\n\t> ').replace(" ", "+")))
 
 
-# For formatting purposes
 clear()
 
 
@@ -173,7 +170,6 @@ EPS = list(grabeps(driver()))
 REQUESTED = sortinput(inputfmt(f"Which Episodes ({EPS[0]}-{EPS[-1]}):"), EPS)
 
 
-# For formatting purposes
 clear()
 
 
@@ -186,7 +182,6 @@ status(f"Requesting direct link{PLURAL} from host")
 INFO = list(grabbing(driver(), REQUESTED))
 
 
-# For formatting purposes
 clear()
 
 
@@ -199,5 +194,7 @@ print(f"{TOPIC}{DASH}")
 download(INFO)
 
 
-
 input(f"{DASH}Press ENTER to exit")
+
+
+clear()
