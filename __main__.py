@@ -213,4 +213,4 @@ download(info)
 
 
 #  End program
-kill(f"Process Finished: Downloaded {amount} episodes")
+kill(f"Process Finished: Downloaded {amount} episode{plural}")
