@@ -73,7 +73,7 @@ def mkdir_if_not_exists(path):  #  Make directory if "path" doesn't exist
 def get_loop(url):
     while True:
         try:
-            res = get(url, verify=True, timeout=5)
+            res = get(url, timeout=10)
 
             if res.status_code == 200:
                 return res
