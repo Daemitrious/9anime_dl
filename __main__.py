@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from subprocess import Popen
 
-from requests import get, post
+from requests import get, post, ReadTimeout
 from bs4 import BeautifulSoup, Tag
 
 from os import makedirs
@@ -70,12 +70,26 @@ def mkdir_if_not_exists(path):  #  Make directory if "path" doesn't exist
         makedirs(path)
 
 
+def get_loop(url):
+    while True:
+        try:
+            res = get(url, verify=True, timeout=5)
+
+            if res.status_code == 200:
+                return res
+            else:
+                break
+
+        except ReadTimeout:
+            break
+
+
 def soupify(html):  #  html  ->  BeautifulSoup
     return BeautifulSoup(html, "lxml")
 
 
 def gethtml(url):  #  requests.get
-    return soupify(get(url).text)
+    return soupify(get_loop(url).text)
 
 def getjs(Driver, urls, find):  #  Driver.get
     Wait = WebDriverWait(Driver, 5, 3)
