@@ -73,15 +73,13 @@ def mkdir_if_not_exists(path):  #  Make directory if "path" doesn't exist
 def get_loop(url):
     while True:
         try:
-            res = get(url, timeout=10)
+            res = get(url, timeout=5)
 
             if res.status_code == 200:
                 return res
-            else:
-                break
 
         except ReadTimeout:
-            break
+            continue
 
 
 def soupify(html):  #  html  ->  BeautifulSoup
