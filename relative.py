@@ -139,15 +139,12 @@ def readconfig():
 
 
 #  Sources (Host & Download Server)
-MAIN       =  "https://www12.9anime.to/"
-VIDSTREAM  =  "https://vidstream.pro/download/"
-
-#  Replace forbidden symbols
-FILTER = {"\\":"-", "/":"-"}
+MAIN = "https://www12.9anime.to/"
+VIDSTREAM = "https://vidstream.pro/download/"
 
 #  Preload prompt
 PROMPT = 'Download Path:  "%s"  |  "/help" for commands.'
 
 
-parent = f"{dirname(__file__)}/"
+parent = dirname(__file__) + "/"
 config_path = parent + "config.txt"
