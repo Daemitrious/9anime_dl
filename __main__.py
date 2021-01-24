@@ -1,7 +1,6 @@
-from relative import (FILTER, MAIN, PROMPT, Popen, Tag, ask, change_path,
-                      clear, config, dirname, driver, ec, end, exists, get,
-                      getcwd, gethtml, getjs, mkdir_if_not_exists, post,
-                      readconfig)
+from relative import (MAIN, PROMPT, Popen, Tag, ask, change_path, config,
+                      driver, ec, end, exists, get, gethtml, getjs,
+                      mkdir_if_not_exists, parent, post, readconfig)
 
 
 #  Formats results [0-9] for selection
@@ -96,7 +95,7 @@ mkdir_if_not_exists(path.rsplit("/", 1)[0])
 
 
 #  Sort data and begin download(s) in under a new service
-if Popen([f"nohup python3.8 {getcwd()}/background.py {path} {epurl} {' '.join(requested)} >/dev/null &"], shell=True).wait() == 0:
+if Popen([f"nohup python3.8 {parent}background.py {path} {epurl} {' '.join(requested)} >/dev/null &"], shell=True).wait() == 0:
     end((lambda l: f"Downloading {l} episode{'s' if l > 1 else ''} in the background") (len(requested)), False)
 else:
     end("Error occured when beginning download", False)
