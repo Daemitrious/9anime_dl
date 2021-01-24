@@ -1,8 +1,6 @@
 #####     Imports     ##############################################################################
 
 
-from getpass import getuser
-from json import dumps, loads
 from os import makedirs
 from os.path import dirname, exists
 from subprocess import Popen
@@ -151,5 +149,5 @@ FILTER = {"\\":"-", "/":"-"}
 PROMPT = 'Download Path:  "%s"  |  "/help" for commands.'
 
 
-parent = f"/home/{getuser()}/{dirname(__file__)}/"
+parent = f"{dirname(__file__)}/"
 config_path = parent + "config.txt"
