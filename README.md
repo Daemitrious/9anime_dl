@@ -1,8 +1,7 @@
 ***Anime Downloader*** - Scrapes from *https://www12.9anime.to*
 
 # 9anime_dl
-- Supported Platforms: **Windows**
-- Downloads to `C:\Users\USER\Videos\Anime`
+- Supported Platforms: **Linux**
 
 # *Requirements*
 
