@@ -16,7 +16,6 @@ def grabdl(URL):
 
 #  Grabs path and direct download link for each episode
 def grabbing(driver, path, epurl, episodes):
-
     for p, soup in zip([path % ep for ep in episodes], getjs(driver, [epurl % ep for ep in episodes], ec("//div[@id='player']//iframe"))):
         yield p, grabdl(VIDSTREAM + grabkey(soup))
 
@@ -31,4 +30,4 @@ def download(info):
 
 
 #  Begin downloading process
-download(grabbing(driver(), " ".join(argv[1:3]), argv[3], argv[4:]))
+download(grabbing(driver(), argv[1].replace("_", " "), argv[2], argv[3:]))
