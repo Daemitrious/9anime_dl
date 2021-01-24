@@ -1,8 +1,9 @@
 #####     Imports     ##############################################################################
 
 
-from os import makedirs
+from os import getcwd, makedirs
 from os.path import dirname, exists
+from platform import architecture, machine
 from subprocess import Popen
 
 from bs4 import BeautifulSoup, Tag
@@ -58,6 +59,7 @@ def change_path():
         with open(config_path, "w") as f:
             f.write(new_path if not new_path.endswith("/") else new_path[:-1])
 
+#  Configure downloader
 def config(command):
 
     if command == "help":  #  Will fix later, if I feel like it.
@@ -70,6 +72,12 @@ def config(command):
         end("Exit request")
 
 
+#  Read data file for saved configurations
+def readconfig():
+    with open(config_path, "r") as f:
+        return f.read()
+
+
 #  Set Options (selenium) to headless mode
 def headless(options: Options):
 
@@ -78,7 +86,7 @@ def headless(options: Options):
 
 #  Initiate selenium.webdriver
 def driver():
-    return Firefox(options=headless(Options()), service_log_path=parent + "logging.txt")
+    return Firefox(options=headless(Options()), executable_path=geckodriver_path, service_log_path=parent + "logging.txt")
 
 #  Premade EC for WebDriverWait
 def ec(xpath):
@@ -130,9 +138,27 @@ def getjs(Driver: Firefox, urls: list, find: expected_conditions):
     Driver.quit()
 
 
-def readconfig():
-    with open(config_path, "r") as f:
-        return f.read()
+def geckodriver(url):
+    print("Setting up Geckodriver...")
+    
+    res = get(url)
+
+    if res.status_code != 200:
+        end("Error with geckodriver")
+
+    file = parent + url.rsplit('/', 1)[1]
+
+    with open(file, "wb") as f:
+        for chunk in res.iter_content(1024):
+            f.write(chunk)
+
+    for cmd in (
+
+        f"tar -xvzf {file} -C {parent}",
+        f"rm {file}",
+        f"chmod +x geckodriver",
+
+    ):  Popen(cmd, shell=True).wait()
 
 
 #####     Variables     ############################################################################
@@ -146,5 +172,18 @@ VIDSTREAM = "https://vidstream.pro/download/"
 PROMPT = 'Download Path:  "%s"  |  "/help" for commands.'
 
 
-parent = dirname(__file__) + "/"
+parent = (lambda cwd, dn: dn if cwd == dn[:len(cwd)] else cwd + dn) (getcwd() + "/", dirname(__file__) + "/")
+
 config_path = parent + "config.txt"
+geckodriver_path = parent + "geckodriver"
+
+
+#####     Setup     ################################################################################
+
+
+if not exists(geckodriver_path):
+    geckodriver(
+        (lambda v, m: f"https://github.com/mozilla/geckodriver/releases/download/v0.{v}.0/geckodriver-v0.{v}.0-{m}.tar.gz") (
+            *(("29", "linux" + architecture()[0][0:2]) if machine()[:3] != "arm" else ("23", "arm7hf"))
+        )
+    )
