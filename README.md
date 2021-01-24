@@ -10,6 +10,8 @@ Because 9anime does NOT like it when people download their content using bots or
 
 `pip3 install requests bs4 lxml selenium`
 
+If you do not have a 'geckodriver' in the same directory as `9anime_dl` then it will automatically grab a compatible version from the official Mozilla Geckodriver Github repository.  If you want to use a specific version, then just place it inside of the same directory as `__main__.py` and make sure it has the name "geckodriver".
+
 - *Add [webdriver][1] to **PATH** under *System Variables* of *System Environmental Variables**
 
 
