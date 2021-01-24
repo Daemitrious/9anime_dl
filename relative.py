@@ -78,7 +78,7 @@ def headless(options: Options):
 
 #  Initiate selenium.webdriver
 def driver():
-    return Firefox(options=headless(Options()), service_log_path="/home/pi/Documents/Programming/Data/Logs/9anime_dl.txt")
+    return Firefox(options=headless(Options()), service_log_path=parent + "logging.txt")
 
 #  Premade EC for WebDriverWait
 def ec(xpath):
