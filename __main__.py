@@ -54,14 +54,14 @@ def main():
     if not exists(path):
         change_path()
         main()
-    else:
-        inp = ask(PROMPT % path, True)
+
+    inp = ask(PROMPT % path, True)
 
     if inp.startswith("/"):
         config(inp[1:])
         main()
-    else:
-        return inp, path
+
+    return inp, path
 
 
 #  Anime requested by the user along with download path
@@ -93,9 +93,8 @@ requested = sortinput(ask(f"Which Episodes ({eps[0]}-{eps[-1]}):", True))
 mkdir_if_not_exists(path.rsplit("/", 1)[0])
 
 
-
 #  Sort data and begin download(s) in under a new service
-if Popen([f"nohup python3.8 {parent}background.py {path} {epurl} {' '.join(requested)} >/dev/null &"], shell=True).wait() == 0:
+if Popen([f"nohup python3.8 {parent}background.py {path.replace(' ', '_')} {epurl} {' '.join(requested)} >/dev/null &"], shell=True).wait() == 0:
     end((lambda l: f"Downloading {l} episode{'s' if l > 1 else ''} in the background") (len(requested)), False)
 else:
     end("Error occured when beginning download", False)
