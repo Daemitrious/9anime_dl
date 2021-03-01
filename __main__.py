@@ -14,7 +14,7 @@ def show_dict(data):
 
 
 #  Prompt user with results and grab title and href based from input
-def listsearch(soup):
+def list_search(soup):
 
     if soup.find("ul", class_="anime-list").find("li"):
         return (lambda data: show_dict(data).get(ask(show_list([t[0] for t in data])))) ([(a["data-jtitle"], a["href"][1:]) for a in [li.find("a", class_="name") for li in soup.find("ul", class_="anime-list").find_all("li")[:10]]])
@@ -23,7 +23,7 @@ def listsearch(soup):
 
 
 #  Selects applicable episode(s) for download
-def sortinput(inp):
+def sort_input(inp):
 
     try:
         if "-" not in inp:
@@ -40,8 +40,8 @@ def sortinput(inp):
 
 
 #  Grab each episode number from each ul available
-def grabeps(driver):
-    for ul in list(get_js(driver, epurl.rsplit("/", 1)[0], ec("//ul[@class='episodes']")))[0].find_all("ul", class_="episodes"):
+def grab_episodes(driver):
+    for ul in list(get_js(driver, episode_url.rsplit("/", 1)[0], ec("//ul[@class='episodes']")))[0].find_all("ul", class_="episodes"):
         for li in ul:
             for a in li:
                 if isinstance(a, Tag):
@@ -54,7 +54,7 @@ def main(dl_path):
     if not dl_path or not check_path(dl_path):
         set_path()
         return main(get_path())
-        
+
     inp = ask(PROMPT % dl_path, True)
 
     if inp.startswith("/"):
@@ -69,11 +69,11 @@ search, path = main(get_path())
 
 
 # Grabs title and server of anime specified
-anime, href = listsearch(get_html(MAIN + get_filter() + search.replace(" ", "+")))
+anime, href = list_search(get_html(MAIN + get_filter() + search.replace(" ", "+")))
 
 
 #  Format episode url according to href of anime
-epurl = MAIN + href + "/ep-%s"
+episode_url = MAIN + href + "/ep-%s"
 
 
 #  Creates new tree if directory of anime title does not exist
@@ -82,19 +82,19 @@ path += f"/{anime.replace('/', '-')}/Episode %s.mp4"
 
 #  Grabs each valid episode
 print("Grabbing available episodes...")
-eps = list(grabeps(driver()))
+eps = list(grab_episodes(driver()))
 
 
 #  Grabs episodes from EPS list according to user input
-requested = sortinput(ask(f"Which Episodes ({eps[0]}-{eps[-1]}):", True))
+requested = sort_input(ask(f"Which Episodes ({eps[0]}-{eps[-1]}):", True))
 
 
 #  Create new directory if path is non-existant
 mkdir_if_not_exists(path.rsplit("/", 1)[0])
 
 
-#  Sort data and begin download(s) in under a new service
-if call(f"{get_compiler()} {parent}background.py {path.replace(' ', '_')} {epurl} {' '.join(requested)} >/dev/null 2>{parent}error.out &") == 0:
+#  Sort data and begin download(s) as a new process
+if call('%s %sbackground.py %s %s %s >/dev/null 2>%serror.out &' % (get_compiler(), parent, "".join((lambda filt: [filt.get(char) if char in filt.keys() else char for char in path]) ({" ": "_", "(": "\\(", ")": "\\)"})), episode_url, " ".join(requested), parent)) == 0:
     end((lambda l: f"Downloading {l} episode{'s' if l > 1 else ''} in the background") (len(requested)), False)
 else:
     end("Error occured when beginning download", False)
