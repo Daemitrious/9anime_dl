@@ -1,6 +1,7 @@
-from relative import (MAIN, PROMPT, Popen, Tag, ask, change_path, config,
-                      driver, ec, end, exists, get, gethtml, getjs,
-                      mkdir_if_not_exists, parent, post, readconfig)
+from relative import (MAIN, PROMPT, Tag, ask, call, check_path, configure,
+                      driver, ec, end, exists, get_compiler, get_filter,
+                      get_html, get_js, get_path, mkdir_if_not_exists, parent,
+                      set_path)
 
 
 #  Formats results [0-9] for selection
@@ -40,7 +41,7 @@ def sortinput(inp):
 
 #  Grab each episode number from each ul available
 def grabeps(driver):
-    for ul in list(getjs(driver, epurl.rsplit("/", 1)[0], ec("//ul[@class='episodes']")))[0].find_all("ul", class_="episodes"):
+    for ul in list(get_js(driver, epurl.rsplit("/", 1)[0], ec("//ul[@class='episodes']")))[0].find_all("ul", class_="episodes"):
         for li in ul:
             for a in li:
                 if isinstance(a, Tag):
@@ -48,28 +49,27 @@ def grabeps(driver):
 
 
 #  Search anime or configure downloader
-def main():
-    path = readconfig()
+def main(dl_path):
 
-    if not exists(path):
-        change_path()
-        main()
-
-    inp = ask(PROMPT % path, True)
+    if not dl_path or not check_path(dl_path):
+        set_path()
+        return main(get_path())
+        
+    inp = ask(PROMPT % dl_path, True)
 
     if inp.startswith("/"):
-        config(inp[1:])
-        main()
+        configure(inp[1:])
+        return main(get_path())
 
-    return inp, path
+    return inp, dl_path
 
 
 #  Anime requested by the user along with download path
-search, path = main()
+search, path = main(get_path())
 
 
 # Grabs title and server of anime specified
-anime, href = listsearch(gethtml(MAIN + "search?keyword=" + search.replace(" ", "+")))
+anime, href = listsearch(get_html(MAIN + get_filter() + search.replace(" ", "+")))
 
 
 #  Format episode url according to href of anime
@@ -94,7 +94,7 @@ mkdir_if_not_exists(path.rsplit("/", 1)[0])
 
 
 #  Sort data and begin download(s) in under a new service
-if Popen([f"nohup python3.8 {parent}background.py {path.replace(' ', '_')} {epurl} {' '.join(requested)} >/dev/null &"], shell=True).wait() == 0:
+if call(f"{get_compiler()} {parent}background.py {path.replace(' ', '_')} {epurl} {' '.join(requested)} >/dev/null 2>{parent}error.out &") == 0:
     end((lambda l: f"Downloading {l} episode{'s' if l > 1 else ''} in the background") (len(requested)), False)
 else:
     end("Error occured when beginning download", False)
