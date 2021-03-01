@@ -1,8 +1,6 @@
 from sys import argv
 
-from requests import post
-
-from relative import VIDSTREAM, driver, ec, get, gethtml, getjs
+from relative import VIDSTREAM, driver, ec, get, get_html, get_js, post
 
 
 #  Grabs key for specified episode
@@ -11,12 +9,12 @@ def grabkey(soup):
 
 #  Post request in order to grab downlink link from direct host
 def grabdl(URL):
-    return post(URL, data={"token": gethtml(URL).find("input", type="hidden")["value"]}, headers={"Content-Type": "application/x-www-form-urlencoded"}, stream=True).url
+    return post(URL, data={"token": get_html(URL).find("input", type="hidden")["value"]}, headers={"Content-Type": "application/x-www-form-urlencoded"}, stream=True).url
 
 
 #  Grabs path and direct download link for each episode
 def grabbing(driver, path, epurl, episodes):
-    for p, soup in zip([path % ep for ep in episodes], getjs(driver, [epurl % ep for ep in episodes], ec("//div[@id='player']//iframe"))):
+    for p, soup in zip([path % ep for ep in episodes], get_js(driver, [epurl % ep for ep in episodes], ec("//div[@id='player']//iframe"))):
         yield p, grabdl(VIDSTREAM + grabkey(soup))
 
 
